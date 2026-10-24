@@ -1,0 +1,60 @@
+# Байес формуласы
+def bayes(p_h, signal):
+    if signal == "ALARM":
+        likelihood_h = 0.90
+        likelihood_s = 0.10
+    else:
+        likelihood_h = 0.10
+        likelihood_s = 0.90
+
+    weight_h = p_h * likelihood_h
+    weight_s = (1 - p_h) * likelihood_s
+
+    return weight_h / (weight_h + weight_s)
+
+
+print("Байес нәтижелері:")
+print("P(H | ALARM) =", round(bayes(0.20, "ALARM"), 4))
+print("P(H | NORMAL) =", round(bayes(0.20, "NORMAL"), 4))
+
+
+# Сезімталдық талдауы: бір ALARM сигналы
+print("\nСезімталдық талдауы:")
+
+for prior in [0.05, 0.20, 0.50, 0.80]:
+    posterior = bayes(prior, "ALARM")
+    print(f"Бастапқы: {prior:.2f}, соңғы: {posterior:.4f}")
+
+
+# HMM сүзгісі
+observations = ["ALARM", "NORMAL", "ALARM", "ALARM"]
+p_h = 0.20
+
+print("\nHMM нәтижелері:")
+
+for t, signal in enumerate(observations, start=1):
+    # t1-де бастапқы ықтималдық қолданылады
+    if t == 1:
+        predicted_h = p_h
+    else:
+        predicted_h = 0.80 * p_h + 0.10 * (1 - p_h)
+
+    predicted_s = 1 - predicted_h
+
+    if signal == "ALARM":
+        weight_h = predicted_h * 0.90
+        weight_s = predicted_s * 0.10
+    else:
+        weight_h = predicted_h * 0.10
+        weight_s = predicted_s * 0.90
+
+    # Нормалау
+    total = weight_h + weight_s
+    p_h = weight_h / total
+    p_s = weight_s / total
+
+    print(
+        f"t{t}, {signal}: "
+        f"болжам H={predicted_h:.4f}, S={predicted_s:.4f}; "
+        f"жаңарту H={p_h:.4f}, S={p_s:.4f}"
+    )
