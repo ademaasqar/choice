@@ -1,0 +1,61 @@
+# Аймақтардың атаулары
+states = ["A", "B", "C"]
+
+# Өту матрицасы
+T = [
+    [0.7, 0.3, 0.0],
+    [0.2, 0.6, 0.2],
+    [0.0, 0.3, 0.7]
+]
+
+# Бақылау ықтималдықтары
+emission = {
+    "RED": [0.8, 0.5, 0.2],
+    "BLUE": [0.2, 0.5, 0.8]
+}
+
+# Бастапқы ықтималдықтар
+belief = [0.5, 0.3, 0.2]
+
+# Бақылау сигналдары
+observations = ["RED", "BLUE", "BLUE", "RED"]
+
+
+# Келесі қадамдағы ықтималдықтарды болжау
+def predict(belief):
+    result = [0, 0, 0]
+
+    for j in range(3):
+        for i in range(3):
+            result[j] += belief[i] * T[i][j]
+
+    return result
+
+
+# Бақылау сигналы бойынша ықтималдықтарды жаңарту
+def update(prediction, likelihood):
+    result = []
+
+    for i in range(3):
+        result.append(prediction[i] * likelihood[i])
+
+    total = sum(result)
+
+    for i in range(3):
+        result[i] = result[i] / total
+
+    return result
+
+
+# Барлық бақылау сигналдарын өңдеу
+for signal in observations:
+    prediction = predict(belief)
+    belief = update(prediction, emission[signal])
+
+    most_likely = states[belief.index(max(belief))]
+
+    print(
+        "Бақылау:", signal,
+        "| Ықтималдық:", [round(x, 4) for x in belief],
+        "| Ең ықтимал аймақ:", most_likely
+    )
